@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BookEasy - Home</title>
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+    <header>
+        <h1>BookEasy</h1>
+        <div id="nav-links"></div>
+    </header>
+    <div class="container">
+        <h2>Available Services</h2>
+        <div id="services-list">Loading services...</div>
+    </div>
+    <script src="/js/app.js"></script>
+    <script>
+        async function loadServices() {
+            try {
+                const services = await apiCall('/services');
+                const list = document.getElementById('services-list');
+                list.innerHTML = '';
+                if (services.length === 0) {
+                    list.innerHTML = '<p>No services available yet.</p>';
+                }
+                services.forEach(s => {
+                    list.innerHTML += `
+                        <div class="card">
+                            <h3>${s.name}</h3>
+                            <p>${s.description || 'No description'}</p>
+                            <p><strong>Provider:</strong> ${s.provider_name}</p>
+                            <p><strong>Price:</strong> $${s.price}</p>
+                            <p><strong>Duration:</strong> ${s.duration_minutes} mins</p>
+                            <button onclick="bookService(${s.id})">Book Now</button>
+                        </div>
+                    `;
+                });
+            } catch (err) {
+                document.getElementById('services-list').innerHTML = `<p class="error">${err.message}</p>`;
+            }
+        }
+
+        async function bookService(serviceId) {
+            const user = JSON.parse(localStorage.getItem('user'));
+            if (!user) {
+                alert('Please login to book a service');
+                window.location.href = '/login.html';
+                return;
+            }
+            if (user.role !== 'customer') {
+                alert('Only customers can book services.');
+                return;
+            }
+
+            const dateStr = prompt("Enter appointment date (YYYY-MM-DD HH:MM):", new Date().toISOString().slice(0, 16).replace('T', ' '));
+            if (dateStr) {
+                try {
+                    const result = await apiCall('/appointments', 'POST', { service_id: serviceId, appointment_date: dateStr });
+                    alert('Appointment booked successfully!');
+                } catch (err) {
+                    alert(err.message);
+                }
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', loadServices);
+    </script>
+</body>
+</html>

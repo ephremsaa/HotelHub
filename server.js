@@ -5,6 +5,9 @@ const path = require('path');
 require('dotenv').config();
 
 const db = require('./src/config/db'); // Initialize DB
+const authRoutes = require('./src/routes/authRoutes');
+const serviceRoutes = require('./src/routes/serviceRoutes');
+const appointmentRoutes = require('./src/routes/appointmentRoutes');
 
 const app = express();
 
@@ -16,10 +19,10 @@ app.use(morgan('dev')); // Logging middleware
 // Static files (Vanilla Frontend)
 app.use(express.static(path.join(__dirname, 'public')));
 
-// API Routes placeholder
-app.get('/api/health', (req, res) => {
-    res.json({ status: 'API is running' });
-});
+// API Routes
+app.use('/api/auth', authRoutes);
+app.use('/api/services', serviceRoutes);
+app.use('/api/appointments', appointmentRoutes);
 
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {

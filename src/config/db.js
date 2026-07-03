@@ -1,21 +1,26 @@
-const sqlite3 = require('sqlite3').verbose();
-const path = require('path');
+const { Pool } = require('pg');
 const fs = require('fs');
+const path = require('path');
+require('dotenv').config();
 
-const dbPath = path.resolve(__dirname, '../../database.sqlite');
-const schemaPath = path.resolve(__dirname, '../../schema.sql');
+const pool = new Pool({
+    connectionString: process.env.DATABASE_URL
+});
 
-const db = new sqlite3.Database(dbPath, (err) => {
+pool.connect((err, client, release) => {
     if (err) {
-        console.error('Error opening database', err.message);
+        console.error('Error acquiring client', err.stack);
     } else {
-        console.log('Connected to the SQLite database.');
+        console.log('Connected to the PostgreSQL database.');
         
         // Initialize the database with schema.sql
+        const schemaPath = path.resolve(__dirname, '../../schema.sql');
         const schema = fs.readFileSync(schemaPath, 'utf-8');
-        db.exec(schema, (err) => {
+        
+        client.query(schema, (err, result) => {
+            release();
             if (err) {
-                console.error('Error executing schema', err.message);
+                console.error('Error executing schema', err.stack);
             } else {
                 console.log('Database schema initialized.');
             }
@@ -23,4 +28,4 @@ const db = new sqlite3.Database(dbPath, (err) => {
     }
 });
 
-module.exports = db;
+module.exports = pool;

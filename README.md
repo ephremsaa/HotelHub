@@ -8,7 +8,7 @@ This project was built as a capstone assessment for Web Programming II.
 
 - **Backend Architecture**: Node.js & Express.js following a strict **MVC** (Model-View-Controller) structure.
 - **RESTful API**: Clean API design for frontend interaction.
-- **Database**: SQLite (Relational Database) using raw DDL schemas.
+- **Database**: PostgreSQL (Relational Database) using raw DDL schemas and `pg` module.
 - **Frontend**: Vanilla HTML/CSS/JavaScript. It demonstrates how to consume a REST API without relying on EJS or external UI frameworks.
 - **Security**:
   - **Authentication**: User Registration and Login.
@@ -24,7 +24,7 @@ This project was built as a capstone assessment for Web Programming II.
 
 - **Runtime**: Node.js
 - **Server**: Express.js
-- **Database**: SQLite3
+- **Database**: PostgreSQL (`pg`)
 - **Security**: `bcrypt`, `jsonwebtoken`, `express-rate-limit`, `cors`
 - **Frontend**: Vanilla JS, HTML5, CSS3
 
@@ -39,12 +39,10 @@ This project was built as a capstone assessment for Web Programming II.
 
 ## 💾 Database Schema (DDL)
 
-The database schema is written in `schema.sql`.
-* **users**: `id`, `name`, `email`, `password_hash`, `role` (customer, provider, admin), `created_at`
-* **services**: `id`, `provider_id` (FK), `name`, `description`, `duration_minutes`, `price`, `created_at`
-* **appointments**: `id`, `customer_id` (FK), `service_id` (FK), `appointment_date`, `status`, `created_at`
-
-*(Note: SQLite uses `sqlite3` natively. No separate server is required! The database file `database.sqlite` is automatically generated on the first run.)*
+The database schema is written in `schema.sql` (PostgreSQL Dialect).
+* **users**: `id` (SERIAL), `name`, `email`, `password_hash`, `role` (customer, provider, admin), `created_at`
+* **services**: `id` (SERIAL), `provider_id` (FK), `name`, `description`, `duration_minutes`, `price`, `created_at`
+* **appointments**: `id` (SERIAL), `customer_id` (FK), `service_id` (FK), `appointment_date`, `status`, `created_at`
 
 ## ⚙️ Setup and Installation Instructions
 
@@ -54,17 +52,20 @@ The database schema is written in `schema.sql`.
    npm install
    ```
 3. **Configure Environment Variables**:
-   The `.env` file is used to store environment variables. It has already been created with the following defaults:
+   The `.env` file is used to store environment variables. Make sure your local PostgreSQL server is running and configure the `DATABASE_URL`:
    ```env
    PORT=3000
    JWT_SECRET=supersecretjwtkey_for_bookeasy_project
+   DATABASE_URL=postgres://postgres:password@localhost:5432/bookeasy
    ```
-4. **Start the Server**:
+4. **Create the Database in PostgreSQL**:
+   Open `psql` or pgAdmin and create the database `bookeasy`. (Or change `bookeasy` in the URL to an existing database).
+5. **Start the Server**:
    ```bash
    npm start
    ```
-   *The database schema (`schema.sql`) will be automatically executed, creating the necessary tables inside `database.sqlite`.*
-5. **Access the Application**:
+   *The database schema (`schema.sql`) will be automatically executed, creating the necessary tables inside your PostgreSQL database upon startup.*
+6. **Access the Application**:
    Open your browser and navigate to `http://localhost:3000`.
 
 ## 🧪 How to Test the Flow

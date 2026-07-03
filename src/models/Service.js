@@ -1,33 +1,22 @@
 const db = require('../config/db');
 
 const Service = {
-    create: (provider_id, name, description, duration_minutes, price) => {
-        return new Promise((resolve, reject) => {
-            const stmt = db.prepare(`INSERT INTO services (provider_id, name, description, duration_minutes, price) VALUES (?, ?, ?, ?, ?)`);
-            stmt.run([provider_id, name, description, duration_minutes, price], function(err) {
-                if (err) reject(err);
-                else resolve({ id: this.lastID, provider_id, name, description, duration_minutes, price });
-            });
-            stmt.finalize();
-        });
+    create: async (provider_id, name, description, duration_minutes, price) => {
+        const query = `INSERT INTO services (provider_id, name, description, duration_minutes, price) VALUES ($1, $2, $3, $4, $5) RETURNING *`;
+        const values = [provider_id, name, description, duration_minutes, price];
+        const result = await db.query(query, values);
+        return result.rows[0];
     },
 
-    findAll: () => {
-        return new Promise((resolve, reject) => {
-            db.all(`SELECT s.*, u.name as provider_name FROM services s JOIN users u ON s.provider_id = u.id`, [], (err, rows) => {
-                if (err) reject(err);
-                else resolve(rows);
-            });
-        });
+    findAll: async () => {
+        const query = `SELECT s.*, u.name as provider_name FROM services s JOIN users u ON s.provider_id = u.id`;
+        const result = await db.query(query);
+        return result.rows;
     },
     
-    findById: (id) => {
-        return new Promise((resolve, reject) => {
-            db.get(`SELECT * FROM services WHERE id = ?`, [id], (err, row) => {
-                if (err) reject(err);
-                else resolve(row);
-            });
-        });
+    findById: async (id) => {
+        const result = await db.query(`SELECT * FROM services WHERE id = $1`, [id]);
+        return result.rows[0];
     }
 };
 

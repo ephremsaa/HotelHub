@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HotelHub - My Dashboard</title>
+    <link rel="stylesheet" href="/css/style.css">
+    <style>
+        .timeline {
+            border-left: 2px solid var(--border-color);
+            padding-left: 2rem;
+            margin-left: 1rem;
+            position: relative;
+        }
+        .timeline-item {
+            position: relative;
+            margin-bottom: 2.5rem;
+        }
+        .timeline-item::before {
+            content: '';
+            position: absolute;
+            left: -2.6rem;
+            top: 0;
+            width: 1rem;
+            height: 1rem;
+            background: var(--card-bg);
+            border: 2px solid var(--primary-color);
+            border-radius: 50%;
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar">
+        <div class="nav-container">
+            <a href="/" class="logo">
+                <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg>
+                HotelHub
+            </a>
+            
+            <ul class="nav-menu d-none" id="main-nav-menu">
+                <li><a href="/">Home</a></li>
+                <li><a href="/hotels.html">Destinations</a></li>
+            </ul>
+
+            <div class="nav-auth" id="nav-auth"></div>
+        </div>
+    </nav>
+
+    <div class="dashboard-wrapper">
+        <aside class="sidebar">
+            <ul class="sidebar-nav">
+                <li><a href="#" class="active"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path></svg> Dashboard</a></li>
+                <li><a href="/hotels.html"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg> Browse Hotels</a></li>
+                <li><a href="/favorites.html"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path></svg> Favorites</a></li>
+                <li><a href="#"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><path d="M12 16v-4"></path><path d="M12 8h.01"></path></svg> Support</a></li>
+            </ul>
+        </aside>
+        
+        <main class="dashboard-content">
+            <h1 class="mb-8" style="font-size: 2rem;">My Bookings</h1>
+            
+            <div id="timeline-container" class="timeline">
+                <div class="timeline-item">
+                    <h3 style="color: var(--text-muted);">Loading your trips...</h3>
+                </div>
+            </div>
+            
+            <div id="empty-state" class="d-none" style="text-align: center; padding: 4rem; background: var(--card-bg); border-radius: var(--radius-lg); border: 1px dashed var(--border-color); max-width: 600px; margin: 0 auto;">
+                <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="var(--border-color)" stroke-width="1" style="margin-bottom: 1.5rem;"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
+                <h3 style="font-size: 1.5rem; margin-bottom: 0.5rem;">No upcoming trips</h3>
+                <p style="color: var(--text-muted); margin-bottom: 2rem;">It looks like you haven't booked any hotels yet. Start exploring our luxury destinations.</p>
+                <a href="/hotels.html" class="btn btn-primary">Explore Hotels</a>
+            </div>
+        </main>
+    </div>
+
+    <script src="/js/app.js"></script>
+    <script>
+        if (window.innerWidth > 768) {
+            document.getElementById('main-nav-menu').classList.remove('d-none');
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            const user = JSON.parse(localStorage.getItem('user'));
+            if (!user || user.role !== 'customer') {
+                window.location.href = '/login.html';
+                return;
+            }
+            fetchBookings();
+        });
+
+        async function fetchBookings() {
+            try {
+                const bookings = await apiCall('/bookings/my-bookings');
+                const container = document.getElementById('timeline-container');
+                const emptyState = document.getElementById('empty-state');
+                
+                if (bookings.length === 0) {
+                    container.classList.add('d-none');
+                    emptyState.classList.remove('d-none');
+                    return;
+                }
+                
+                // Sort bookings by check-in date descending
+                bookings.sort((a,b) => new Date(b.check_in) - new Date(a.check_in));
+                
+                container.innerHTML = bookings.map(b => {
+                    const checkIn = new Date(b.check_in).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+                    const checkOut = new Date(b.check_out).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+                    
+                    let statusBadge = 'badge-warning';
+                    if (b.booking_status === 'Confirmed' || b.booking_status === 'Checked In') statusBadge = 'badge-success';
+                    if (b.booking_status === 'Cancelled') statusBadge = 'badge-error';
+                    
+                    return `
+                        <div class="timeline-item">
+                            <div style="font-family: var(--font-display); font-size: 1.1rem; font-weight: 800; color: var(--primary-color); margin-bottom: 0.5rem;">
+                                ${checkIn} — ${checkOut}
+                            </div>
+                            <div style="background: var(--card-bg); padding: 1.5rem; border-radius: var(--radius-lg); box-shadow: var(--shadow-sm); border: 1px solid var(--border-color);">
+                                <div class="d-flex justify-between align-center mb-4">
+                                    <h3 style="font-size: 1.25rem;">${b.hotel_name}</h3>
+                                    <span class="badge ${statusBadge}">${b.booking_status}</span>
+                                </div>
+                                <p style="color: var(--text-muted); font-size: 0.95rem; margin-bottom: 1rem;">
+                                    ${b.room_type_name} • Room ${b.room_number}
+                                </p>
+                                <div class="d-flex justify-between align-center" style="border-top: 1px solid var(--border-color); padding-top: 1rem;">
+                                    <div>
+                                        <span style="font-size: 0.85rem; color: var(--text-muted); display: block;">Total Price</span>
+                                        <span style="font-weight: 700; font-size: 1.1rem;">${b.total_price} BIRR</span>
+                                    </div>
+                                    ${(b.booking_status === 'Pending' || b.booking_status === 'Confirmed') ? 
+                                    `<button class="btn btn-outline" style="padding: 0.5rem 1rem; font-size: 0.85rem; border-color: var(--error); color: var(--error);" onclick="cancelBooking(${b.id})">Cancel Trip</button>` 
+                                    : ''}
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                }).join('');
+            } catch (error) {
+                console.error('Error fetching bookings:', error);
+                showToast('Failed to load your trips', 'error');
+            }
+        }
+
+        async function cancelBooking(id) {
+            if (confirm('Are you sure you want to cancel this reservation?')) {
+                try {
+                    await apiCall(`/bookings/${id}`, 'PUT', { status: 'Cancelled' });
+                    showToast('Reservation cancelled successfully', 'success');
+                    fetchBookings();
+                } catch (err) {
+                    showToast(err.message, 'error');
+                }
+            }
+        }
+    </script>
+</body>
+</html>

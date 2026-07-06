@@ -2,56 +2,100 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>BookEasy - Register</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HotelHub - Register</title>
     <link rel="stylesheet" href="/css/style.css">
+    <style>
+        .auth-nav {
+            position: absolute;
+            top: 2rem;
+            left: 2rem;
+            z-index: 10;
+        }
+        .auth-form-container {
+            max-width: 500px;
+        }
+    </style>
 </head>
 <body>
-    <header>
-        <h1><a href="/" style="margin:0">BookEasy</a></h1>
-        <div id="nav-links"></div>
-    </header>
-    <div class="container">
-        <h2>Register</h2>
-        <div id="error-msg" class="error"></div>
-        <form id="register-form">
-            <div class="form-group">
-                <label>Name</label>
-                <input type="text" id="name" required>
+    
+    <div class="auth-split">
+        <div class="auth-image" style="background-image: url('https://images.unsplash.com/photo-1542314831-c6a4d14cd411?auto=format&fit=crop&q=80');">
+            <div class="auth-nav">
+                <a href="/" class="logo" style="color: white; text-shadow: 0 2px 4px rgba(0,0,0,0.5);">
+                    <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg>
+                    HotelHub
+                </a>
             </div>
-            <div class="form-group">
-                <label>Email</label>
-                <input type="email" id="email" required>
+        </div>
+        <div class="auth-form-wrapper">
+            <div class="auth-form-container">
+                <h2>Create Account</h2>
+                <p class="subtitle">Join the world's most elegant booking platform.</p>
+                
+                <form id="register-form">
+                    <div class="form-group">
+                        <label class="form-label" for="name">Full Name</label>
+                        <input type="text" id="name" class="form-control" required placeholder="John Doe">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label" for="email">Email address</label>
+                        <input type="email" id="email" class="form-control" required placeholder="name@example.com">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label" for="phone">Phone Number</label>
+                        <input type="tel" id="phone" class="form-control" placeholder="+1 234 567 8900">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label" for="password">Password</label>
+                        <input type="password" id="password" class="form-control" required minlength="6" placeholder="••••••••">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label" for="role">Account Type</label>
+                        <select id="role" class="form-control">
+                            <option value="customer">Customer (Book hotels)</option>
+                            <option value="hotel_owner">Hotel Owner (List properties)</option>
+                        </select>
+                    </div>
+                    
+                    <button type="submit" class="btn btn-primary" style="width: 100%; margin-top: 1rem; padding: 1rem;">Create Account</button>
+                </form>
+                
+                <div style="margin-top: 2rem; text-align: center; color: var(--text-muted); font-size: 0.95rem;">
+                    Already have an account? <a href="/login.html" style="font-weight: 600;">Sign in</a>
+                </div>
             </div>
-            <div class="form-group">
-                <label>Password</label>
-                <input type="password" id="password" required minlength="6">
-            </div>
-            <div class="form-group">
-                <label>Role</label>
-                <select id="role">
-                    <option value="customer">Customer</option>
-                    <option value="provider">Service Provider</option>
-                </select>
-            </div>
-            <button type="submit">Register</button>
-        </form>
+        </div>
     </div>
+
     <script src="/js/app.js"></script>
     <script>
         document.getElementById('register-form').addEventListener('submit', async (e) => {
             e.preventDefault();
             const name = document.getElementById('name').value;
             const email = document.getElementById('email').value;
+            const phone = document.getElementById('phone').value;
             const password = document.getElementById('password').value;
             const role = document.getElementById('role').value;
+            const btn = e.target.querySelector('button[type="submit"]');
+            
+            btn.innerHTML = '<span class="loading" style="display:inline-block; width:16px; height:16px; border:2px solid white; border-top-color:transparent; border-radius:50%; animation:spin 1s linear infinite;"></span> Processing...';
+            btn.disabled = true;
+            
             try {
-                await apiCall('/auth/register', 'POST', { name, email, password, role });
-                alert('Registration successful, please login');
-                window.location.href = '/login.html';
+                await apiCall('/auth/register', 'POST', { name, email, phone, password, role });
+                showToast('Account created successfully!', 'success');
+                setTimeout(() => window.location.href = '/login.html', 1500);
             } catch (err) {
-                document.getElementById('error-msg').innerText = err.message;
+                showToast(err.message, 'error');
+                btn.innerHTML = 'Create Account';
+                btn.disabled = false;
             }
         });
+
+        const style = document.createElement('style');
+        style.innerHTML = `@keyframes spin { to { transform: rotate(360deg); } }`;
+        document.head.appendChild(style);
     </script>
 </body>
 </html>

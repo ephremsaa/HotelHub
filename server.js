@@ -6,8 +6,10 @@ require('dotenv').config();
 
 const db = require('./src/config/db'); // Initialize DB
 const authRoutes = require('./src/routes/authRoutes');
-const serviceRoutes = require('./src/routes/serviceRoutes');
-const appointmentRoutes = require('./src/routes/appointmentRoutes');
+const hotelRoutes = require('./src/routes/hotelRoutes');
+const roomRoutes = require('./src/routes/roomRoutes');
+const bookingRoutes = require('./src/routes/bookingRoutes');
+const favoriteRoutes = require('./src/routes/favoriteRoutes');
 
 const app = express();
 
@@ -21,8 +23,10 @@ app.use(express.static(path.join(__dirname, 'public')));
 
 // API Routes
 app.use('/api/auth', authRoutes);
-app.use('/api/services', serviceRoutes);
-app.use('/api/appointments', appointmentRoutes);
+app.use('/api/hotels', hotelRoutes);
+app.use('/api/rooms', roomRoutes);
+app.use('/api/bookings', bookingRoutes);
+app.use('/api/favorites', favoriteRoutes);
 
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {

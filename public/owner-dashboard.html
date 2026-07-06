@@ -1,0 +1,407 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HotelHub - Owner Portal</title>
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+    <nav class="navbar">
+        <div class="nav-container">
+            <a href="/" class="logo">
+                <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg>
+                HotelHub Partner Portal
+            </a>
+            <div class="nav-auth" id="nav-auth"></div>
+        </div>
+    </nav>
+
+    <div class="dashboard-wrapper">
+        <aside class="sidebar">
+            <ul class="sidebar-nav">
+                <li><a href="#" class="active" onclick="showSection('overview', event)"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path></svg> Dashboard</a></li>
+                <li><a href="#" onclick="showSection('manage-hotel', event)"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path></svg> Property Info</a></li>
+                <li><a href="#" onclick="showSection('manage-rooms', event)"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><rect x="7" y="7" width="3" height="9"></rect><rect x="14" y="7" width="3" height="5"></rect></svg> Rooms & Rates</a></li>
+                <li><a href="#" onclick="showSection('reservations', event)"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg> Reservations</a></li>
+            </ul>
+        </aside>
+        
+        <main class="dashboard-content">
+            
+            <section id="overview">
+                <h1 class="mb-8" style="font-size: 2rem;">Property Performance</h1>
+                <div class="stat-grid">
+                    <div class="stat-card">
+                        <span class="stat-card-title">Total Reservations</span>
+                        <span class="stat-card-value" id="stat-reservations">0</span>
+                    </div>
+                    <div class="stat-card">
+                        <span class="stat-card-title">Total Revenue</span>
+                        <span class="stat-card-value" id="stat-revenue" style="color: var(--success);">0 BIRR</span>
+                    </div>
+                    <div class="stat-card">
+                        <span class="stat-card-title">Listed Rooms</span>
+                        <span class="stat-card-value" id="stat-rooms">0</span>
+                    </div>
+                </div>
+                
+                <div class="table-wrapper">
+                    <div style="padding: 1.5rem; border-bottom: 1px solid var(--border-color); background: var(--bg-color);">
+                        <h3 style="margin: 0; font-size: 1.1rem;">Recent Activity</h3>
+                    </div>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Guest</th>
+                                <th>Dates</th>
+                                <th>Amount</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody id="recent-activity-list">
+                            <tr><td colspan="4" class="text-center">Loading activity...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+
+            <section id="manage-hotel" class="d-none">
+                <h1 class="mb-8" style="font-size: 2rem;">Property Information</h1>
+                <div class="table-wrapper" style="padding: 2.5rem; background: var(--card-bg);">
+                    <form id="hotel-form">
+                        <div class="form-group">
+                            <label class="form-label">Property Name</label>
+                            <input type="text" id="hotel_name" class="form-control" required>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Description</label>
+                            <textarea id="description" class="form-control" rows="4"></textarea>
+                        </div>
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem;">
+                            <div class="form-group">
+                                <label class="form-label">Address</label>
+                                <input type="text" id="address" class="form-control" required>
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">City</label>
+                                <input type="text" id="city" class="form-control" required>
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">Country</label>
+                                <input type="text" id="country" class="form-control" required>
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">Star Rating</label>
+                                <input type="number" id="star_rating" class="form-control" min="0" max="5" value="0">
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">Contact Phone</label>
+                                <input type="text" id="phone" class="form-control" required>
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">Contact Email</label>
+                                <input type="email" id="email" class="form-control" required>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Cover Image</label>
+                            <input type="file" id="cover_image" class="form-control" accept="image/*">
+                        </div>
+                        <button type="submit" class="btn btn-primary" style="margin-top: 1rem;">Save Property Details</button>
+                    </form>
+                </div>
+            </section>
+            
+            <section id="manage-rooms" class="d-none">
+                <h1 class="mb-8" style="font-size: 2rem;">Rooms & Rates</h1>
+                
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 2rem; align-items: start;">
+                    <div class="table-wrapper" style="padding: 2rem; background: var(--card-bg);">
+                        <h3 class="mb-4">Create Room Type</h3>
+                        <form id="room-type-form">
+                            <div class="form-group">
+                                <label class="form-label">Type Name (e.g., Deluxe King)</label>
+                                <input type="text" id="rt_name" class="form-control" required>
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">Price per night (BIRR)</label>
+                                <input type="number" id="rt_price" class="form-control" step="0.01" required>
+                            </div>
+                            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+                                <div class="form-group">
+                                    <label class="form-label">Max Capacity</label>
+                                    <input type="number" id="rt_capacity" class="form-control" value="2" required>
+                                </div>
+                                <div class="form-group">
+                                    <label class="form-label">Number of Beds</label>
+                                    <input type="number" id="rt_beds" class="form-control" value="1" required>
+                                </div>
+                            </div>
+                            <button type="submit" class="btn btn-primary" style="width: 100%;">Add Room Type</button>
+                        </form>
+                    </div>
+                    
+                    <div class="table-wrapper" style="padding: 2rem; background: var(--card-bg);">
+                        <h3 class="mb-4">Add Physical Room</h3>
+                        <form id="room-form">
+                            <div class="form-group">
+                                <label class="form-label">Room Type ID</label>
+                                <input type="number" id="r_type_id" class="form-control" placeholder="Enter ID from DB" required>
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">Room Number</label>
+                                <input type="text" id="r_number" class="form-control" required>
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">Floor</label>
+                                <input type="text" id="r_floor" class="form-control">
+                            </div>
+                            <button type="submit" class="btn btn-secondary" style="width: 100%;">Add Physical Room</button>
+                        </form>
+                    </div>
+                </div>
+            </section>
+            
+            <section id="reservations" class="d-none">
+                <h1 class="mb-8" style="font-size: 2rem;">Reservations</h1>
+                <div class="table-wrapper table-responsive">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Guest Info</th>
+                                <th>Room Details</th>
+                                <th>Stay Dates</th>
+                                <th>Total</th>
+                                <th>Status</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+                        <tbody id="res-list">
+                            <!-- JS Inject -->
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+
+        </main>
+    </div>
+
+    <script src="/js/app.js?v=2"></script>
+    <script>
+        let myHotelId = null;
+
+        document.addEventListener('DOMContentLoaded', async () => {
+            const user = JSON.parse(localStorage.getItem('user'));
+            if (!user || user.role !== 'hotel_owner') {
+                window.location.href = '/login.html';
+                return;
+            }
+            
+            try {
+                const hotels = await apiCall('/hotels');
+                const myHotel = hotels.find(h => h.owner_id === user.id);
+                
+                if (myHotel) {
+                    myHotelId = myHotel.id;
+                    populateHotelForm(myHotel);
+                    loadReservations();
+                } else {
+                    showToast('Please set up your property profile first.', 'warning');
+                    showSection('manage-hotel', null);
+                }
+            } catch (err) {
+                console.error(err);
+            }
+        });
+
+        function showSection(id, event) {
+            if(event) event.preventDefault();
+            ['overview', 'manage-hotel', 'manage-rooms', 'reservations'].forEach(sec => {
+                document.getElementById(sec).classList.add('d-none');
+            });
+            document.getElementById(id).classList.remove('d-none');
+            
+            if(event) {
+                document.querySelectorAll('.sidebar-nav a').forEach(a => a.classList.remove('active'));
+                event.currentTarget.classList.add('active');
+            }
+        }
+
+        function populateHotelForm(hotel) {
+            document.getElementById('hotel_name').value = hotel.hotel_name;
+            document.getElementById('description').value = hotel.description;
+            document.getElementById('address').value = hotel.address;
+            document.getElementById('city').value = hotel.city;
+            document.getElementById('country').value = hotel.country;
+            document.getElementById('phone').value = hotel.phone;
+            document.getElementById('email').value = hotel.email;
+            document.getElementById('star_rating').value = hotel.star_rating;
+        }
+
+        document.getElementById('hotel-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const btn = e.target.querySelector('button[type="submit"]');
+            btn.disabled = true;
+
+            const data = new FormData();
+            data.append('hotel_name', document.getElementById('hotel_name').value);
+            data.append('description', document.getElementById('description').value);
+            data.append('address', document.getElementById('address').value);
+            data.append('city', document.getElementById('city').value);
+            data.append('country', document.getElementById('country').value);
+            data.append('phone', document.getElementById('phone').value);
+            data.append('email', document.getElementById('email').value);
+            data.append('star_rating', document.getElementById('star_rating').value);
+            
+            const fileInput = document.getElementById('cover_image');
+            if (fileInput.files.length > 0) {
+                data.append('cover_image', fileInput.files[0]);
+            }
+            
+            try {
+                if (myHotelId) {
+                    await apiCall(`/hotels/${myHotelId}`, 'PUT', data);
+                    showToast('Property details updated!');
+                } else {
+                    const res = await apiCall('/hotels', 'POST', data);
+                    myHotelId = res.hotel.id;
+                    showToast('Property created successfully!');
+                }
+            } catch (err) {
+                showToast(err.message, 'error');
+            } finally {
+                btn.disabled = false;
+            }
+        });
+
+        document.getElementById('room-type-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            if (!myHotelId) return showToast('Create property profile first', 'error');
+            
+            const data = {
+                hotel_id: myHotelId,
+                name: document.getElementById('rt_name').value,
+                price_per_night: document.getElementById('rt_price').value,
+                capacity: document.getElementById('rt_capacity').value,
+                beds: document.getElementById('rt_beds').value,
+                bathrooms: 1,
+                description: ''
+            };
+            
+            try {
+                await apiCall('/rooms/type', 'POST', data);
+                showToast('Room type added!');
+                e.target.reset();
+            } catch (err) {
+                showToast(err.message, 'error');
+            }
+        });
+
+        document.getElementById('room-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            if (!myHotelId) return showToast('Create property profile first', 'error');
+            
+            const data = {
+                hotel_id: myHotelId,
+                room_type_id: document.getElementById('r_type_id').value,
+                room_number: document.getElementById('r_number').value,
+                floor: document.getElementById('r_floor').value
+            };
+            
+            try {
+                await apiCall('/rooms', 'POST', data);
+                showToast('Physical room added!');
+                e.target.reset();
+            } catch (err) {
+                showToast(err.message, 'error');
+            }
+        });
+
+        async function loadReservations() {
+            if (!myHotelId) return;
+            try {
+                const res = await apiCall(`/bookings/hotel/${myHotelId}`);
+                
+                // Update stats
+                document.getElementById('stat-reservations').innerText = res.length;
+                const revenue = res.filter(b => b.booking_status !== 'Cancelled')
+                                   .reduce((sum, b) => sum + parseFloat(b.total_price), 0);
+                document.getElementById('stat-revenue').innerText = `${revenue.toLocaleString(undefined, {minimumFractionDigits: 2})} BIRR`;
+                
+                // Get rooms count (approximate since we don't have a direct endpoint, just leaving it 0 or we can skip it)
+                
+                const tbody = document.getElementById('res-list');
+                const recentTbody = document.getElementById('recent-activity-list');
+                
+                if (res.length === 0) {
+                    tbody.innerHTML = '<tr><td colspan="6" class="text-center">No reservations yet.</td></tr>';
+                    recentTbody.innerHTML = '<tr><td colspan="4" class="text-center">No recent activity.</td></tr>';
+                    return;
+                }
+                
+                // Sort descending
+                res.sort((a,b) => new Date(b.created_at || b.check_in) - new Date(a.created_at || a.check_in));
+                
+                const buildRow = (b, full = true) => {
+                    let statusBadge = 'badge-warning';
+                    if (b.booking_status === 'Confirmed' || b.booking_status === 'Checked In') statusBadge = 'badge-success';
+                    if (b.booking_status === 'Cancelled') statusBadge = 'badge-error';
+                    
+                    const actionHtml = full ? `
+                        <td>
+                            <select class="form-control" onchange="updateStatus(${b.id}, this.value)" style="padding: 0.5rem; width: auto; font-size: 0.85rem;">
+                                <option value="" disabled selected>Update...</option>
+                                <option value="Confirmed">Confirm</option>
+                                <option value="Checked In">Check In</option>
+                                <option value="Checked Out">Check Out</option>
+                                <option value="Cancelled">Cancel</option>
+                            </select>
+                        </td>
+                    ` : '';
+
+                    const detailsHtml = full ? `
+                        <td>
+                            <div style="font-weight: 500;">${b.room_type_name}</div>
+                            <div style="font-size: 0.85rem; color: var(--text-muted);">Room ${b.room_number}</div>
+                        </td>
+                    ` : '';
+
+                    return `
+                        <tr>
+                            <td>
+                                <div style="font-weight: 600; color: var(--primary-color);">${b.customer_name}</div>
+                                <div style="font-size: 0.85rem; color: var(--text-muted);">${b.customer_email}</div>
+                            </td>
+                            ${detailsHtml}
+                            <td>
+                                <div style="font-size: 0.9rem;">${new Date(b.check_in).toLocaleDateString()}</div>
+                                <div style="font-size: 0.85rem; color: var(--text-muted);">to ${new Date(b.check_out).toLocaleDateString()}</div>
+                            </td>
+                            <td style="font-weight: 600;">${b.total_price} BIRR</td>
+                            <td><span class="badge ${statusBadge}">${b.booking_status}</span></td>
+                            ${actionHtml}
+                        </tr>
+                    `;
+                };
+
+                tbody.innerHTML = res.map(b => buildRow(b, true)).join('');
+                recentTbody.innerHTML = res.slice(0, 5).map(b => buildRow(b, false)).join('');
+
+            } catch (err) {
+                console.error(err);
+            }
+        }
+        
+        async function updateStatus(id, status) {
+            try {
+                await apiCall(`/bookings/${id}`, 'PUT', { status });
+                showToast(`Status updated to ${status}`, 'success');
+                loadReservations();
+            } catch (err) {
+                showToast(err.message, 'error');
+            }
+        }
+    </script>
+</body>
+</html>

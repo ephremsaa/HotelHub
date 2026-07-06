@@ -3,69 +3,174 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>BookEasy - Home</title>
+    <title>HotelHub - Premium Booking Experience</title>
     <link rel="stylesheet" href="/css/style.css">
 </head>
 <body>
-    <header>
-        <h1>BookEasy</h1>
-        <div id="nav-links"></div>
+    <nav class="navbar">
+        <div class="nav-container">
+            <a href="/" class="logo">
+                <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg>
+                HotelHub
+            </a>
+            
+            <ul class="nav-menu d-none" id="main-nav-menu">
+                <li><a href="/" class="active">Home</a></li>
+                <li><a href="/hotels.html">Destinations</a></li>
+                <li><a href="/hotels.html">Offers</a></li>
+            </ul>
+
+            <div class="nav-auth" id="nav-auth"></div>
+        </div>
+    </nav>
+
+    <header class="hero">
+        <div class="hero-content">
+            <h1>Find Your Perfect Stay</h1>
+            <p>Discover luxury hotels, affordable rooms, and unforgettable experiences around the world.</p>
+        </div>
     </header>
-    <div class="container">
-        <h2>Available Services</h2>
-        <div id="services-list">Loading services...</div>
-    </div>
+
+    <main class="container">
+        <!-- Floating Search Card -->
+        <div class="floating-search">
+            <div class="search-field">
+                <label>Destination</label>
+                <input type="text" id="search-city" placeholder="Where are you going?">
+            </div>
+            <div class="search-field">
+                <label>Check In</label>
+                <input type="date" id="search-in">
+            </div>
+            <div class="search-field">
+                <label>Check Out</label>
+                <input type="date" id="search-out">
+            </div>
+            <div class="search-field" style="border-right: none;">
+                <label>Guests</label>
+                <select style="border:none; outline:none; font-family:var(--font-heading); font-weight:500; color:var(--text-main); font-size:1rem; background:transparent;">
+                    <option>2 Adults, 1 Room</option>
+                    <option>1 Adult, 1 Room</option>
+                    <option>Family (4), 2 Rooms</option>
+                </select>
+            </div>
+            <button class="btn btn-primary" style="padding: 1rem 2rem; border-radius: var(--radius-full);" onclick="handleSearch()">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+                Search
+            </button>
+        </div>
+
+        <!-- Featured Hotels Section -->
+        <section class="mt-8 mb-8">
+            <div class="d-flex justify-between align-center mb-4">
+                <h2 class="section-title" style="margin-bottom: 0;">Featured Hotels</h2>
+                <a href="/hotels.html" style="font-weight: 600; display: flex; align-items: center; gap: 0.25rem;">View all <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg></a>
+            </div>
+            
+            <div class="hotel-grid" id="featured-hotels">
+                <!-- Skeleton Loading -->
+                <div class="hotel-card" style="padding: 2rem; text-align: center;">
+                    <p style="color: var(--text-muted)">Loading featured hotels...</p>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <footer style="background: var(--primary-dark); color: white; padding: 4rem 2rem; margin-top: 4rem;">
+        <div class="container d-flex justify-between" style="flex-wrap: wrap; gap: 2rem;">
+            <div>
+                <a href="/" class="logo" style="color: white; margin-bottom: 1rem;">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg>
+                    HotelHub
+                </a>
+                <p style="color: #cbd5e1; max-width: 300px; font-size: 0.9rem;">Experience luxury stays and seamless booking with the world's most elegant booking platform.</p>
+            </div>
+            <div>
+                <h4 style="color: white; margin-bottom: 1rem;">Company</h4>
+                <ul style="list-style: none; display: flex; flex-direction: column; gap: 0.5rem; font-size: 0.9rem; color: #cbd5e1;">
+                    <li><a href="#" style="color: #cbd5e1;">About Us</a></li>
+                    <li><a href="#" style="color: #cbd5e1;">Careers</a></li>
+                    <li><a href="#" style="color: #cbd5e1;">Privacy Policy</a></li>
+                </ul>
+            </div>
+        </div>
+    </footer>
+
     <script src="/js/app.js"></script>
     <script>
-        async function loadServices() {
+        // Desktop menu toggle
+        if (window.innerWidth > 768) {
+            document.getElementById('main-nav-menu').classList.remove('d-none');
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            // updateNavbar called from app.js automatically
+            fetchFeaturedHotels();
+            
+            // Set min dates for search
+            const today = new Date().toISOString().split('T')[0];
+            document.getElementById('search-in').min = today;
+            document.getElementById('search-out').min = today;
+        });
+
+        function handleSearch() {
+            const city = document.getElementById('search-city').value;
+            if (city) {
+                window.location.href = `/hotels.html?city=${encodeURIComponent(city)}`;
+            } else {
+                window.location.href = '/hotels.html';
+            }
+        }
+
+        async function fetchFeaturedHotels() {
             try {
-                const services = await apiCall('/services');
-                const list = document.getElementById('services-list');
-                list.innerHTML = '';
-                if (services.length === 0) {
-                    list.innerHTML = '<p>No services available yet.</p>';
-                }
-                services.forEach(s => {
-                    list.innerHTML += `
-                        <div class="card">
-                            <h3>${s.name}</h3>
-                            <p>${s.description || 'No description'}</p>
-                            <p><strong>Provider:</strong> ${s.provider_name}</p>
-                            <p><strong>Price:</strong> $${s.price}</p>
-                            <p><strong>Duration:</strong> ${s.duration_minutes} mins</p>
-                            <button onclick="bookService(${s.id})">Book Now</button>
+                const hotels = await apiCall('/hotels');
+                const grid = document.getElementById('featured-hotels');
+                
+                if (hotels.length === 0) {
+                    grid.innerHTML = `
+                        <div style="grid-column: 1/-1; text-align: center; padding: 4rem; background: var(--card-bg); border-radius: var(--radius-lg); border: 1px dashed var(--border-color);">
+                            <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="var(--text-muted)" stroke-width="1" style="margin-bottom: 1rem;"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path><circle cx="12" cy="10" r="3"></circle></svg>
+                            <h3 style="color: var(--text-main); margin-bottom: 0.5rem;">No hotels listed yet</h3>
+                            <p style="color: var(--text-muted);">Check back soon for amazing destinations.</p>
                         </div>
                     `;
-                });
-            } catch (err) {
-                document.getElementById('services-list').innerHTML = `<p class="error">${err.message}</p>`;
-            }
-        }
-
-        async function bookService(serviceId) {
-            const user = JSON.parse(localStorage.getItem('user'));
-            if (!user) {
-                alert('Please login to book a service');
-                window.location.href = '/login.html';
-                return;
-            }
-            if (user.role !== 'customer') {
-                alert('Only customers can book services.');
-                return;
-            }
-
-            const dateStr = prompt("Enter appointment date (YYYY-MM-DD HH:MM):", new Date().toISOString().slice(0, 16).replace('T', ' '));
-            if (dateStr) {
-                try {
-                    const result = await apiCall('/appointments', 'POST', { service_id: serviceId, appointment_date: dateStr });
-                    alert('Appointment booked successfully!');
-                } catch (err) {
-                    alert(err.message);
+                    return;
                 }
+                
+                // Show first 6 hotels
+                const displayHotels = hotels.slice(0, 6);
+                
+                grid.innerHTML = displayHotels.map(hotel => `
+                    <div class="hotel-card" onclick="window.location.href='/hotel-details.html?id=${hotel.id}'">
+                        <div class="img-wrapper">
+                            <div class="badge-rating">
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" stroke="none" style="color: var(--warning)"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>
+                                ${hotel.star_rating}
+                            </div>
+                            <img src="${hotel.cover_image || 'https://images.unsplash.com/photo-1566073771259-6a8506099945?auto=format&fit=crop&q=80'}" alt="${hotel.hotel_name}">
+                        </div>
+                        <div class="hotel-card-content">
+                            <h3 class="hotel-card-title">${hotel.hotel_name}</h3>
+                            <div class="hotel-card-location">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path><circle cx="12" cy="10" r="3"></circle></svg>
+                                ${hotel.city}, ${hotel.country}
+                            </div>
+                            <div class="hotel-card-footer">
+                                <div>
+                                    <div class="hotel-card-price" style="font-size: 1.25rem;">199 BIRR <span>/ night</span></div>
+                                </div>
+                                <button class="btn btn-outline" style="padding: 0.5rem 1rem; font-size: 0.85rem;">View Rooms</button>
+                            </div>
+                        </div>
+                    </div>
+                `).join('');
+                
+            } catch (err) {
+                console.error(err);
+                document.getElementById('featured-hotels').innerHTML = '<p class="error">Failed to load hotels.</p>';
             }
         }
-
-        document.addEventListener('DOMContentLoaded', loadServices);
     </script>
 </body>
 </html>

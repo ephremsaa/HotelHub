@@ -1,8 +1,6 @@
-# BookEasy - Online Appointment Booking System
+# HotelHub - Premium Booking Experience
 
-BookEasy is a fully functional web application designed for online appointment scheduling. It allows Service Providers to offer services and Customers to book appointments seamlessly.
-
-This project was built as a capstone assessment for Web Programming II.
+HotelHub is a fully functional web application designed for online hotel reservations and property management. It allows Hotel Owners to offer properties/rooms and Customers to book stays seamlessly.
 
 ## 🚀 Features & Architecture
 
@@ -12,7 +10,7 @@ This project was built as a capstone assessment for Web Programming II.
 - **Frontend**: Vanilla HTML/CSS/JavaScript. It demonstrates how to consume a REST API without relying on EJS or external UI frameworks.
 - **Security**:
   - **Authentication**: User Registration and Login.
-  - **Authorization**: Role-Based Access Control (Customer, Provider, Admin).
+  - **Authorization**: Role-Based Access Control (Customer, Hotel Owner, Admin).
   - **Hashing**: Passwords are securely hashed using `bcrypt`.
   - **Sessions**: Stateless JWT (JSON Web Token) authentication.
 - **Advanced Features (Beyond Course Scope)**:
@@ -37,13 +35,6 @@ This project was built as a capstone assessment for Web Programming II.
 - `public`: Vanilla frontend files (Views).
 - `schema.sql`: DDL definition for the relational database.
 
-## 💾 Database Schema (DDL)
-
-The database schema is written in `schema.sql` (PostgreSQL Dialect).
-* **users**: `id` (SERIAL), `name`, `email`, `password_hash`, `role` (customer, provider, admin), `created_at`
-* **services**: `id` (SERIAL), `provider_id` (FK), `name`, `description`, `duration_minutes`, `price`, `created_at`
-* **appointments**: `id` (SERIAL), `customer_id` (FK), `service_id` (FK), `appointment_date`, `status`, `created_at`
-
 ## ⚙️ Setup and Installation Instructions
 
 1. **Clone the repository** (or extract the folder).
@@ -55,11 +46,11 @@ The database schema is written in `schema.sql` (PostgreSQL Dialect).
    The `.env` file is used to store environment variables. Make sure your local PostgreSQL server is running and configure the `DATABASE_URL`:
    ```env
    PORT=3000
-   JWT_SECRET=supersecretjwtkey_for_bookeasy_project
-   DATABASE_URL=postgres://postgres:password@localhost:5432/bookeasy
+   JWT_SECRET=supersecretjwtkey_for_hotelhub_project
+   DATABASE_URL=postgres://postgres:password@localhost:5432/hotelhub
    ```
 4. **Create the Database in PostgreSQL**:
-   Open `psql` or pgAdmin and create the database `bookeasy`. (Or change `bookeasy` in the URL to an existing database).
+   Open `psql` or pgAdmin and create the database `hotelhub`. (Or change `hotelhub` in the URL to an existing database).
 5. **Start the Server**:
    ```bash
    npm start
@@ -67,10 +58,3 @@ The database schema is written in `schema.sql` (PostgreSQL Dialect).
    *The database schema (`schema.sql`) will be automatically executed, creating the necessary tables inside your PostgreSQL database upon startup.*
 6. **Access the Application**:
    Open your browser and navigate to `http://localhost:3000`.
-
-## 🧪 How to Test the Flow
-1. Go to `http://localhost:3000/register.html` and register an account with the role **Service Provider**.
-2. Login and navigate to your Dashboard to create a new Service.
-3. Logout and register a new account with the role **Customer**.
-4. Login and book the service created by the provider on the Home page.
-5. You can view the scheduled appointments in the Dashboard.

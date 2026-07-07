@@ -10,7 +10,12 @@ exports.createRoomType = async (req, res) => {
             return res.status(403).json({ error: 'Not authorized for this hotel' });
         }
 
-        const roomType = await Room.createRoomType(hotel_id, name, description, capacity, price_per_night, beds, bathrooms);
+        let image_url = null;
+        if (req.file) {
+            image_url = '/uploads/' + req.file.filename;
+        }
+
+        const roomType = await Room.createRoomType(hotel_id, name, description, capacity, price_per_night, beds, bathrooms, image_url);
         res.status(201).json({ message: 'Room type created', roomType });
     } catch (err) {
         console.error(err);
@@ -54,5 +59,62 @@ exports.updateRoomStatus = async (req, res) => {
     } catch (err) {
         console.error(err);
         res.status(500).json({ error: 'Server error updating room status' });
+    }
+};
+
+exports.getRoomTypesByHotel = async (req, res) => {
+    try {
+        const types = await Room.getRoomTypesByHotelId(req.params.hotelId);
+        res.json(types);
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ error: 'Server error fetching room types' });
+    }
+};
+
+exports.deleteRoomType = async (req, res) => {
+    try {
+        await Room.deleteRoomType(req.params.id);
+        res.json({ message: 'Room type deleted' });
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ error: 'Server error deleting room type' });
+    }
+};
+
+exports.updateRoomType = async (req, res) => {
+    try {
+        const { name, capacity, price_per_night, beds } = req.body;
+        let image_url = null;
+        if (req.file) {
+            image_url = '/uploads/' + req.file.filename;
+        }
+        
+        const roomType = await Room.updateRoomType(req.params.id, name, capacity, price_per_night, beds, image_url);
+        res.json({ message: 'Room type updated', roomType });
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ error: 'Server error updating room type' });
+    }
+};
+
+exports.updateRoom = async (req, res) => {
+    try {
+        const { room_number, floor, status } = req.body;
+        const room = await Room.updateRoom(req.params.id, room_number, floor, status);
+        res.json({ message: 'Room updated', room });
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ error: 'Server error updating room' });
+    }
+};
+
+exports.deleteRoom = async (req, res) => {
+    try {
+        await Room.deleteRoom(req.params.id);
+        res.json({ message: 'Room deleted' });
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ error: 'Server error deleting room' });
     }
 };

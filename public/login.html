@@ -61,8 +61,8 @@
             const password = document.getElementById('password').value;
             const btn = e.target.querySelector('button[type="submit"]');
             
-            btn.innerHTML = '<span class="loading" style="display:inline-block; width:16px; height:16px; border:2px solid white; border-top-color:transparent; border-radius:50%; animation:spin 1s linear infinite;"></span> Signing In...';
-            btn.disabled = true;
+            setButtonLoading(btn, true, "Signing In...");
+            
             
             try {
                 const data = await apiCall('/auth/login', 'POST', { email, password });
@@ -78,8 +78,8 @@
                 setTimeout(() => window.location.href = dashboardLink, 1000);
             } catch (err) {
                 showToast(err.message, 'error');
-                btn.innerHTML = 'Sign In';
-                btn.disabled = false;
+                setButtonLoading(btn, false, "Sign In");
+                
             }
         });
 

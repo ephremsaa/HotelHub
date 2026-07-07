@@ -46,7 +46,7 @@
                     </div>
                 </div>
                 
-                <div class="table-wrapper">
+                <div class="table-wrapper table-responsive">
                     <div style="padding: 1.5rem; border-bottom: 1px solid var(--border-color); background: var(--bg-color);">
                         <h3 style="margin: 0; font-size: 1.1rem;">Recent Activity</h3>
                     </div>
@@ -92,21 +92,54 @@
                                 <input type="text" id="country" class="form-control" required>
                             </div>
                             <div class="form-group">
-                                <label class="form-label">Star Rating</label>
-                                <input type="number" id="star_rating" class="form-control" min="0" max="5" value="0">
-                            </div>
-                            <div class="form-group">
-                                <label class="form-label">Contact Phone</label>
+                                <label class="form-label">Phone Number</label>
                                 <input type="text" id="phone" class="form-control" required>
                             </div>
                             <div class="form-group">
-                                <label class="form-label">Contact Email</label>
+                                <label class="form-label">Email Address</label>
                                 <input type="email" id="email" class="form-control" required>
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">Star Rating</label>
+                                <select id="star_rating" class="form-control">
+                                    <option value="1">1 Star</option>
+                                    <option value="2">2 Stars</option>
+                                    <option value="3" selected>3 Stars</option>
+                                    <option value="4">4 Stars</option>
+                                    <option value="5">5 Stars</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">Base Price per Night (BIRR)</label>
+                                <input type="number" id="base_price" class="form-control" step="0.01" value="0.00" required>
+                            </div>
+                            
+                            <div class="form-group" style="grid-column: 1 / -1;">
+                                <label class="form-label">Services / Amenities</label>
+                                <div style="display: flex; gap: 1.5rem; flex-wrap: wrap;">
+                                    <label style="display: flex; align-items: center; gap: 0.5rem;"><input type="checkbox" name="amenity" value="WiFi"> WiFi</label>
+                                    <label style="display: flex; align-items: center; gap: 0.5rem;"><input type="checkbox" name="amenity" value="Room Service"> Room Service</label>
+                                    <label style="display: flex; align-items: center; gap: 0.5rem;"><input type="checkbox" name="amenity" value="Fitness Center"> Fitness Center</label>
+                                    <label style="display: flex; align-items: center; gap: 0.5rem;"><input type="checkbox" name="amenity" value="Swimming Pool"> Swimming Pool</label>
+                                    <label style="display: flex; align-items: center; gap: 0.5rem;"><input type="checkbox" name="amenity" value="Spa & Wellness"> Spa & Wellness</label>
+                                    <label style="display: flex; align-items: center; gap: 0.5rem;"><input type="checkbox" name="amenity" value="24/7 Front Desk"> 24/7 Front Desk</label>
+                                </div>
                             </div>
                         </div>
                         <div class="form-group">
                             <label class="form-label">Cover Image</label>
                             <input type="file" id="cover_image" class="form-control" accept="image/*">
+                            <div id="cover_preview" style="margin-top: 0.5rem;"></div>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Pool View Image (Optional)</label>
+                            <input type="file" id="pool_image" class="form-control" accept="image/*">
+                            <div id="pool_preview" style="margin-top: 0.5rem;"></div>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Hotel Gallery (Optional, Multiple)</label>
+                            <input type="file" id="gallery_images" class="form-control" accept="image/*" multiple>
+                            <div id="gallery_preview" style="display: flex; gap: 0.5rem; flex-wrap: wrap; margin-top: 0.5rem;"></div>
                         </div>
                         <button type="submit" class="btn btn-primary" style="margin-top: 1rem;">Save Property Details</button>
                     </form>
@@ -116,9 +149,9 @@
             <section id="manage-rooms" class="d-none">
                 <h1 class="mb-8" style="font-size: 2rem;">Rooms & Rates</h1>
                 
-                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 2rem; align-items: start;">
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 2rem; align-items: start;">
                     <div class="table-wrapper" style="padding: 2rem; background: var(--card-bg);">
-                        <h3 class="mb-4">Create Room Type</h3>
+                        <h3 class="mb-4" id="room-type-form-title">Create Room Type</h3>
                         <form id="room-type-form">
                             <div class="form-group">
                                 <label class="form-label">Type Name (e.g., Deluxe King)</label>
@@ -138,7 +171,14 @@
                                     <input type="number" id="rt_beds" class="form-control" value="1" required>
                                 </div>
                             </div>
-                            <button type="submit" class="btn btn-primary" style="width: 100%;">Add Room Type</button>
+                            <div class="form-group">
+                                <label class="form-label">Room Image (Optional)</label>
+                                <input type="file" id="rt_image" class="form-control" accept="image/*">
+                            </div>
+                            <div class="d-flex justify-between" style="gap: 1rem; margin-top: 1rem;">
+                                <button type="submit" id="room-type-submit-btn" class="btn btn-primary" style="flex: 1;">Add Room Type</button>
+                                <button type="button" id="room-type-cancel-btn" class="btn btn-secondary d-none" onclick="cancelEditRoomType()">Cancel</button>
+                            </div>
                         </form>
                     </div>
                     
@@ -146,8 +186,11 @@
                         <h3 class="mb-4">Add Physical Room</h3>
                         <form id="room-form">
                             <div class="form-group">
-                                <label class="form-label">Room Type ID</label>
-                                <input type="number" id="r_type_id" class="form-control" placeholder="Enter ID from DB" required>
+                                <label class="form-label">Room Type</label>
+                                <select id="r_type_id" class="form-control" required>
+                                    <option value="" disabled selected>Select a Room Type</option>
+                                    <!-- Options injected here -->
+                                </select>
                             </div>
                             <div class="form-group">
                                 <label class="form-label">Room Number</label>
@@ -159,6 +202,46 @@
                             </div>
                             <button type="submit" class="btn btn-secondary" style="width: 100%;">Add Physical Room</button>
                         </form>
+                    </div>
+                </div>
+                
+                <div style="margin-top: 3rem;">
+                    <h3 class="mb-4">Your Room Types</h3>
+                    <div class="table-wrapper table-responsive">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Image</th>
+                                    <th>Type Name</th>
+                                    <th>Price</th>
+                                    <th>Capacity</th>
+                                    <th>Action</th>
+                                </tr>
+                            </thead>
+                            <tbody id="room-types-list">
+                                <!-- JS Inject -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <div style="margin-top: 3rem;">
+                    <h3 class="mb-4">Your Physical Rooms</h3>
+                    <div class="table-wrapper table-responsive">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Room No.</th>
+                                    <th>Type</th>
+                                    <th>Floor</th>
+                                    <th>Status</th>
+                                    <th>Action</th>
+                                </tr>
+                            </thead>
+                            <tbody id="physical-rooms-list">
+                                <!-- JS Inject -->
+                            </tbody>
+                        </table>
                     </div>
                 </div>
             </section>
@@ -190,6 +273,7 @@
     <script src="/js/app.js?v=2"></script>
     <script>
         let myHotelId = null;
+        let editingRoomTypeId = null;
 
         document.addEventListener('DOMContentLoaded', async () => {
             const user = JSON.parse(localStorage.getItem('user'));
@@ -198,6 +282,11 @@
                 return;
             }
             
+            await loadHotelProfile();
+        });
+
+        async function loadHotelProfile() {
+            const user = JSON.parse(localStorage.getItem('user'));
             try {
                 const hotels = await apiCall('/hotels');
                 const myHotel = hotels.find(h => h.owner_id === user.id);
@@ -205,6 +294,7 @@
                 if (myHotel) {
                     myHotelId = myHotel.id;
                     populateHotelForm(myHotel);
+                    loadRoomTypes();
                     loadReservations();
                 } else {
                     showToast('Please set up your property profile first.', 'warning');
@@ -213,7 +303,7 @@
             } catch (err) {
                 console.error(err);
             }
-        });
+        }
 
         function showSection(id, event) {
             if(event) event.preventDefault();
@@ -237,6 +327,47 @@
             document.getElementById('phone').value = hotel.phone;
             document.getElementById('email').value = hotel.email;
             document.getElementById('star_rating').value = hotel.star_rating;
+            document.getElementById('base_price').value = hotel.base_price;
+            
+            if (hotel.amenities) {
+                document.querySelectorAll('input[name="amenity"]').forEach(cb => {
+                    cb.checked = hotel.amenities.includes(cb.value);
+                });
+            }
+
+            if (hotel.cover_image) {
+                document.getElementById('cover_preview').innerHTML = `<img src="${hotel.cover_image}" style="width: 150px; border-radius: var(--radius-sm); border: 1px solid var(--border-color);">`;
+            } else {
+                document.getElementById('cover_preview').innerHTML = '';
+            }
+
+            if (hotel.pool_image_url) {
+                document.getElementById('pool_preview').innerHTML = `<img src="${hotel.pool_image_url}" style="width: 150px; border-radius: var(--radius-sm); border: 1px solid var(--border-color);">`;
+            } else {
+                document.getElementById('pool_preview').innerHTML = '';
+            }
+
+            if (hotel.gallery_images && hotel.gallery_images.length > 0) {
+                document.getElementById('gallery_preview').innerHTML = hotel.gallery_images.map(img => `
+                    <div style="position: relative; display: inline-block;">
+                        <img src="${img.url}" style="width: 100px; height: 100px; object-fit: cover; border-radius: var(--radius-sm); border: 1px solid var(--border-color);">
+                        <button type="button" onclick="deleteGalleryImage(${img.id})" style="position: absolute; top: -5px; right: -5px; background: var(--error); color: white; border: none; border-radius: 50%; width: 24px; height: 24px; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: bold; box-shadow: var(--shadow-sm);">✕</button>
+                    </div>
+                `).join('');
+            } else {
+                document.getElementById('gallery_preview').innerHTML = '';
+            }
+        }
+
+        async function deleteGalleryImage(imageId) {
+            if (!confirm('Are you sure you want to delete this gallery image?')) return;
+            try {
+                await apiCall(`/hotels/gallery/${imageId}`, 'DELETE');
+                showToast('Gallery image deleted', 'success');
+                await loadHotelProfile(); // Reload data to update UI
+            } catch (err) {
+                showToast(err.message, 'error');
+            }
         }
 
         document.getElementById('hotel-form').addEventListener('submit', async (e) => {
@@ -253,12 +384,26 @@
             data.append('phone', document.getElementById('phone').value);
             data.append('email', document.getElementById('email').value);
             data.append('star_rating', document.getElementById('star_rating').value);
+            data.append('base_price', document.getElementById('base_price').value);
             
-            const fileInput = document.getElementById('cover_image');
-            if (fileInput.files.length > 0) {
-                data.append('cover_image', fileInput.files[0]);
+            const amenities = Array.from(document.querySelectorAll('input[name="amenity"]:checked')).map(cb => cb.value);
+            data.append('amenities', JSON.stringify(amenities));
+            const coverInput = document.getElementById('cover_image');
+            if (coverInput.files.length > 0) {
+                data.append('cover_image', coverInput.files[0]);
             }
             
+            const poolInput = document.getElementById('pool_image');
+            if (poolInput.files.length > 0) {
+                data.append('pool_image', poolInput.files[0]);
+            }
+            
+            const galleryInput = document.getElementById('gallery_images');
+            if (galleryInput.files.length > 0) {
+                for (let i = 0; i < galleryInput.files.length; i++) {
+                    data.append('gallery_images', galleryInput.files[i]);
+                }
+            }
             try {
                 if (myHotelId) {
                     await apiCall(`/hotels/${myHotelId}`, 'PUT', data);
@@ -279,20 +424,30 @@
             e.preventDefault();
             if (!myHotelId) return showToast('Create property profile first', 'error');
             
-            const data = {
-                hotel_id: myHotelId,
-                name: document.getElementById('rt_name').value,
-                price_per_night: document.getElementById('rt_price').value,
-                capacity: document.getElementById('rt_capacity').value,
-                beds: document.getElementById('rt_beds').value,
-                bathrooms: 1,
-                description: ''
-            };
+            const data = new FormData();
+            data.append('hotel_id', myHotelId);
+            data.append('name', document.getElementById('rt_name').value);
+            data.append('price_per_night', document.getElementById('rt_price').value);
+            data.append('capacity', document.getElementById('rt_capacity').value);
+            data.append('beds', document.getElementById('rt_beds').value);
+            data.append('bathrooms', 1);
+            data.append('description', '');
+            
+            const fileInput = document.getElementById('rt_image');
+            if (fileInput.files.length > 0) {
+                data.append('image_url', fileInput.files[0]);
+            }
             
             try {
-                await apiCall('/rooms/type', 'POST', data);
-                showToast('Room type added!');
-                e.target.reset();
+                if (editingRoomTypeId) {
+                    await apiCall(`/rooms/type/${editingRoomTypeId}`, 'PUT', data);
+                    showToast('Room type updated!');
+                } else {
+                    await apiCall('/rooms/type', 'POST', data);
+                    showToast('Room type added!');
+                }
+                cancelEditRoomType(); // reset form
+                loadRoomTypes(); // Refresh dropdown and list
             } catch (err) {
                 showToast(err.message, 'error');
             }
@@ -313,10 +468,127 @@
                 await apiCall('/rooms', 'POST', data);
                 showToast('Physical room added!');
                 e.target.reset();
+                loadPhysicalRooms();
             } catch (err) {
                 showToast(err.message, 'error');
             }
         });
+
+        async function loadRoomTypes() {
+            if (!myHotelId) return;
+            try {
+                const types = await apiCall(`/rooms/types/${myHotelId}`);
+                
+                // Populate Dropdown
+                const select = document.getElementById('r_type_id');
+                select.innerHTML = '<option value="" disabled selected>Select a Room Type</option>' + 
+                    types.map(t => `<option value="${t.id}">${t.name} (${t.price_per_night} BIRR)</option>`).join('');
+                
+                // Populate Table
+                const tbody = document.getElementById('room-types-list');
+                tbody.innerHTML = types.map(t => `
+                    <tr>
+                        <td>
+                            ${t.image_url ? `<img src="${t.image_url}" alt="${t.name}" style="width: 50px; height: 50px; object-fit: cover; border-radius: var(--radius-sm);">` : '<div style="width: 50px; height: 50px; background: #eee; border-radius: var(--radius-sm); display: flex; align-items: center; justify-content: center; font-size: 0.8rem; color: #999;">No Image</div>'}
+                        </td>
+                        <td>${t.name}</td>
+                        <td>${t.price_per_night} BIRR</td>
+                        <td>${t.capacity} Guests</td>
+                        <td>
+                            <div style="display: flex; gap: 0.5rem;">
+                                <button class="btn btn-outline" style="padding: 0.25rem 0.75rem; border-color: var(--primary-color); color: var(--primary-color);" onclick='editRoomType(${JSON.stringify(t).replace(/'/g, "&#39;")})'>Edit</button>
+                                <button class="btn btn-outline" style="padding: 0.25rem 0.75rem; border-color: var(--error); color: var(--error);" onclick="deleteRoomType(${t.id})">Delete</button>
+                            </div>
+                        </td>
+                    </tr>
+                `).join('');
+                
+                loadPhysicalRooms();
+            } catch (err) {
+                console.error('Failed to load room types:', err);
+            }
+        }
+        
+        async function deleteRoomType(id) {
+            if (!confirm('Are you sure you want to delete this room type? All physical rooms of this type will also be deleted!')) return;
+            try {
+                await apiCall(`/rooms/type/${id}`, 'DELETE');
+                showToast('Room type deleted successfully');
+                if (editingRoomTypeId === id) cancelEditRoomType();
+                loadRoomTypes();
+            } catch (err) {
+                showToast('Failed to delete room type', 'error');
+            }
+        }
+
+        function editRoomType(type) {
+            editingRoomTypeId = type.id;
+            document.getElementById('rt_name').value = type.name;
+            document.getElementById('rt_price').value = type.price_per_night;
+            document.getElementById('rt_capacity').value = type.capacity;
+            document.getElementById('rt_beds').value = type.beds;
+            document.getElementById('room-type-form-title').innerText = 'Edit Room Type';
+            document.getElementById('room-type-submit-btn').innerText = 'Update Room Type';
+            document.getElementById('room-type-cancel-btn').classList.remove('d-none');
+            document.getElementById('rt_name').focus();
+            window.scrollTo({ top: document.getElementById('manage-rooms').offsetTop - 100, behavior: 'smooth' });
+        }
+
+        function cancelEditRoomType() {
+            editingRoomTypeId = null;
+            document.getElementById('room-type-form').reset();
+            document.getElementById('room-type-form-title').innerText = 'Create Room Type';
+            document.getElementById('room-type-submit-btn').innerText = 'Add Room Type';
+            document.getElementById('room-type-cancel-btn').classList.add('d-none');
+        }
+
+        async function loadPhysicalRooms() {
+            if (!myHotelId) return;
+            try {
+                const rooms = await apiCall(`/rooms/hotel/${myHotelId}`);
+                const tbody = document.getElementById('physical-rooms-list');
+                tbody.innerHTML = rooms.map(r => `
+                    <tr>
+                        <td>${r.room_number}</td>
+                        <td>${r.room_type_name}</td>
+                        <td>${r.floor || 'N/A'}</td>
+                        <td>
+                            <select onchange="updateRoomStatus(${r.id}, this.value)" style="padding: 0.25rem; border-radius: 4px; border: 1px solid var(--border-color);">
+                                <option value="available" ${r.status === 'available' ? 'selected' : ''}>Available</option>
+                                <option value="occupied" ${r.status === 'occupied' ? 'selected' : ''}>Occupied</option>
+                                <option value="maintenance" ${r.status === 'maintenance' ? 'selected' : ''}>Maintenance</option>
+                            </select>
+                        </td>
+                        <td>
+                            <button class="btn btn-outline" style="padding: 0.25rem 0.75rem; border-color: var(--error); color: var(--error);" onclick="deletePhysicalRoom(${r.id})">Delete</button>
+                        </td>
+                    </tr>
+                `).join('');
+            } catch (err) {
+                console.error('Failed to load physical rooms:', err);
+            }
+        }
+        
+        async function updateRoomStatus(id, newStatus) {
+            try {
+                await apiCall(`/rooms/status/${id}`, 'PUT', { status: newStatus });
+                showToast('Status updated');
+            } catch(e) {
+                showToast('Failed to update status', 'error');
+                loadPhysicalRooms(); // revert UI
+            }
+        }
+
+        async function deletePhysicalRoom(id) {
+            if (!confirm('Are you sure you want to delete this room?')) return;
+            try {
+                await apiCall(`/rooms/${id}`, 'DELETE');
+                showToast('Room deleted successfully');
+                loadPhysicalRooms();
+            } catch (err) {
+                showToast('Failed to delete room', 'error');
+            }
+        }
 
         async function loadReservations() {
             if (!myHotelId) return;
@@ -372,6 +644,7 @@
                             <td>
                                 <div style="font-weight: 600; color: var(--primary-color);">${b.customer_name}</div>
                                 <div style="font-size: 0.85rem; color: var(--text-muted);">${b.customer_email}</div>
+                                ${b.customer_phone ? `<div style="font-size: 0.85rem; color: var(--text-muted); margin-top: 2px;">📞 ${b.customer_phone}</div>` : ''}
                             </td>
                             ${detailsHtml}
                             <td>

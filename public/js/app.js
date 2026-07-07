@@ -72,44 +72,67 @@ function updateNavbar() {
     }
 }
 
-// Simple Toast Notification Utility
+// Enhanced Toast Notification Utility
 function showToast(message, type = 'success') {
     let container = document.getElementById('toast-container');
     if (!container) {
         container = document.createElement('div');
         container.id = 'toast-container';
-        container.style.cssText = 'position: fixed; bottom: 2rem; right: 2rem; z-index: 9999; display: flex; flex-direction: column; gap: 1rem;';
+        container.style.cssText = 'position: fixed; top: 2rem; right: 2rem; z-index: 9999; display: flex; flex-direction: column; gap: 1rem; pointer-events: none;';
         document.body.appendChild(container);
     }
     
     const toast = document.createElement('div');
-    const bgColor = type === 'success' ? 'var(--success)' : 'var(--error)';
+    const isSuccess = type === 'success';
+    const isWarning = type === 'warning';
+    
+    let bgColor = 'var(--error)';
+    if (isSuccess) bgColor = 'var(--success)';
+    if (isWarning) bgColor = 'var(--warning)';
+
     toast.style.cssText = `
-        background: ${bgColor}; 
-        color: white; 
+        background: var(--card-bg); 
+        color: var(--text-main); 
         padding: 1rem 1.5rem; 
         border-radius: var(--radius-md); 
-        box-shadow: var(--shadow-lg); 
+        box-shadow: 0 10px 40px rgba(0,0,0,0.15); 
+        border-left: 4px solid ${bgColor};
         font-weight: 500; 
-        animation: fadeInUp 0.3s ease;
+        animation: slideInRight 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
         display: flex;
         align-items: center;
-        gap: 0.5rem;
+        gap: 0.75rem;
+        pointer-events: auto;
     `;
     
-    const icon = type === 'success' ? 
-        `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"></polyline></svg>` : 
-        `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg>`;
+    let iconSvg = '';
+    if (isSuccess) {
+        iconSvg = `<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="${bgColor}" stroke-width="2"><polyline points="20 6 9 17 4 12"></polyline></svg>`;
+    } else if (isWarning) {
+        iconSvg = `<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="${bgColor}" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>`;
+    } else {
+        iconSvg = `<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="${bgColor}" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg>`;
+    }
         
-    toast.innerHTML = `${icon} <span>${message}</span>`;
+    toast.innerHTML = `${iconSvg} <span style="font-size: 0.95rem;">${message}</span>`;
     container.appendChild(toast);
     
     setTimeout(() => {
-        toast.style.opacity = '0';
-        toast.style.transform = 'translateY(20px)';
-        toast.style.transition = 'all 0.3s ease';
-        setTimeout(() => toast.remove(), 300);
+        toast.style.animation = 'slideOutRight 0.4s forwards';
+        setTimeout(() => toast.remove(), 400);
     }, 4000);
+}
+
+// Global Button Loading State Helper
+function setButtonLoading(btn, isLoading, defaultText = 'Submit') {
+    if (!btn) return;
+    if (isLoading) {
+        btn.disabled = true;
+        btn.innerHTML = `<svg class="spinner" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="animation: spin 1s linear infinite;"><circle cx="12" cy="12" r="10" stroke-opacity="0.25"></circle><path d="M12 2a10 10 0 0 1 10 10"></path></svg> <span>Loading...</span>`;
+    } else {
+        btn.disabled = false;
+        btn.innerHTML = defaultText;
+    }
 }
 
 // Add scroll listener for sticky nav styling
@@ -135,7 +158,7 @@ document.addEventListener('DOMContentLoaded', () => {
     
     if (navContainer && navMenu) {
         const hamburgerBtn = document.createElement('button');
-        hamburgerBtn.className = 'hamburger-btn d-none';
+        hamburgerBtn.className = 'hamburger-btn';
         hamburgerBtn.innerHTML = '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="12" x2="21" y2="12"></line><line x1="3" y1="6" x2="21" y2="6"></line><line x1="3" y1="18" x2="21" y2="18"></line></svg>';
         
         // Insert right before auth so it floats correctly
@@ -143,6 +166,28 @@ document.addEventListener('DOMContentLoaded', () => {
         
         hamburgerBtn.addEventListener('click', () => {
             navMenu.classList.toggle('active');
+        });
+    }
+
+    // Inject mobile sidebar toggle for dashboards
+    const sidebar = document.querySelector('.sidebar');
+    const dashboardWrapper = document.querySelector('.dashboard-wrapper');
+    if (sidebar && dashboardWrapper) {
+        const toggleBtn = document.createElement('button');
+        toggleBtn.className = 'sidebar-toggle-btn';
+        toggleBtn.innerHTML = '☰ Dashboard Menu';
+        
+        dashboardWrapper.insertBefore(toggleBtn, sidebar);
+        
+        toggleBtn.addEventListener('click', () => {
+            sidebar.classList.toggle('mobile-open');
+        });
+
+        // Close sidebar when clicking a link on mobile
+        sidebar.querySelectorAll('a').forEach(link => {
+            link.addEventListener('click', () => {
+                sidebar.classList.remove('mobile-open');
+            });
         });
     }
 });

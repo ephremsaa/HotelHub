@@ -14,7 +14,7 @@
                 HotelHub
             </a>
             
-            <ul class="nav-menu d-none" id="main-nav-menu">
+            <ul class="nav-menu" id="main-nav-menu">
                 <li><a href="/">Home</a></li>
                 <li><a href="/hotels.html">Destinations</a></li>
             </ul>
@@ -126,8 +126,11 @@
                     
                     <div class="gallery-masonry">
                         <img src="${imgUrl}" alt="Main view" class="main-img">
-                        <img src="https://images.unsplash.com/photo-1582719508461-905c673771fd?auto=format&fit=crop&q=80" alt="Room detail">
-                        <img src="https://images.unsplash.com/photo-1571501434316-4a46a5814521?auto=format&fit=crop&q=80" alt="Pool view">
+                        ${hotel.gallery_images && hotel.gallery_images.length > 0 
+                            ? hotel.gallery_images.map(img => `<img src="${img.url}" alt="Hotel Gallery">`).join('')
+                            : `<img src="https://images.unsplash.com/photo-1582719508461-905c673771fd?auto=format&fit=crop&q=80" alt="Room detail">
+                               <img src="https://images.unsplash.com/photo-1571501434316-4a46a5814521?auto=format&fit=crop&q=80" alt="Pool view">`
+                        }
                     </div>
                     
                     <div class="hotel-details-layout">
@@ -137,13 +140,27 @@
                                 ${hotel.description || 'Experience world-class service at this luxurious property. Nestled in the heart of the city, this hotel offers unparalleled comfort, breathtaking views, and modern amenities designed to make your stay unforgettable.'}
                             </p>
                             
-                            <h2 class="section-title" style="font-size: 1.5rem; margin-bottom: 1.5rem;">Premium Amenities</h2>
-                            <div class="amenities-grid mb-8">
-                                <div class="amenity-card"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--primary-color)" stroke-width="2"><path d="M5 12.55a11 11 0 0 1 14.08 0"></path><path d="M1.42 9a16 16 0 0 1 21.16 0"></path><path d="M8.53 16.11a6 6 0 0 1 6.95 0"></path><line x1="12" y1="20" x2="12.01" y2="20"></line></svg> High-Speed WiFi</div>
-                                <div class="amenity-card"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--primary-color)" stroke-width="2"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path></svg> Room Service</div>
-                                <div class="amenity-card"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--primary-color)" stroke-width="2"><path d="M22 12h-4l-3 9L9 3l-3 9H2"></path></svg> Fitness Center</div>
-                                <div class="amenity-card"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--primary-color)" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><path d="M12 8v4l3 3"></path></svg> 24/7 Front Desk</div>
-                            </div>
+                            ${hotel.amenities && hotel.amenities.length > 0 ? `
+                                <h2 class="section-title" style="font-size: 1.5rem; margin-bottom: 1.5rem;">Premium Amenities</h2>
+                                <div class="amenities-grid mb-8">
+                                    ${hotel.amenities.map(am => `
+                                        <div class="amenity-card">
+                                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--primary-color)" stroke-width="2">
+                                                ${am === 'WiFi' ? '<path d="M5 12.55a11 11 0 0 1 14.08 0"></path><path d="M1.42 9a16 16 0 0 1 21.16 0"></path><path d="M8.53 16.11a6 6 0 0 1 6.95 0"></path><line x1="12" y1="20" x2="12.01" y2="20"></line>' : ''}
+                                                ${am === 'Room Service' ? '<path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path>' : ''}
+                                                ${am === 'Fitness Center' ? '<path d="M22 12h-4l-3 9L9 3l-3 9H2"></path>' : ''}
+                                                ${am === 'Swimming Pool' ? '<path d="M2 12h20"></path><path d="M2 18h20"></path><path d="M10 12v6"></path><path d="M14 12v6"></path><path d="M6 12v6"></path><path d="M18 12v6"></path>' : ''}
+                                                ${am === '24/7 Front Desk' ? '<circle cx="12" cy="12" r="10"></circle><path d="M12 8v4l3 3"></path>' : ''}
+                                            </svg> ${am}
+                                        </div>
+                                    `).join('')}
+                                </div>
+                            ` : ''}
+
+                            ${hotel.pool_image_url ? `
+                                <h2 class="section-title" style="font-size: 1.5rem; margin-bottom: 1.5rem;">Pool & Leisure</h2>
+                                <img src="${hotel.pool_image_url}" alt="Pool View" style="width: 100%; max-height: 400px; object-fit: cover; border-radius: var(--radius-lg); margin-bottom: 3rem;">
+                            ` : ''}
                             
                             <h2 class="section-title" style="font-size: 1.5rem; margin-bottom: 1.5rem;">Select Your Room</h2>
                             <div id="rooms-list" style="display: flex; flex-direction: column; gap: 1.5rem;">
@@ -174,7 +191,7 @@
                 } else {
                     roomsList.innerHTML = availableRooms.map(room => `
                         <div style="display: flex; border: 1px solid var(--border-color); border-radius: var(--radius-lg); overflow: hidden; background: var(--card-bg); box-shadow: var(--shadow-sm);">
-                            <div style="width: 200px; background: url('https://images.unsplash.com/photo-1590490359683-658d3d23f972?auto=format&fit=crop&q=80') center/cover;"></div>
+                            <div style="width: 200px; background: url('${room.image_url ? room.image_url : 'https://images.unsplash.com/photo-1590490359683-658d3d23f972?auto=format&fit=crop&q=80'}') center/cover;"></div>
                             <div style="padding: 1.5rem; flex: 1; display: flex; flex-direction: column; justify-content: space-between;">
                                 <div>
                                     <h3 style="font-size: 1.25rem; margin-bottom: 0.5rem; color: var(--primary-dark);">${room.room_type_name}</h3>

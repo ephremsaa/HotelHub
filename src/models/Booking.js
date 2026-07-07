@@ -30,7 +30,7 @@ const Booking = {
 
     findByHotelId: async (hotel_id) => {
         const result = await db.query(`
-            SELECT b.*, u.name as customer_name, u.email as customer_email, r.room_number, rt.name as room_type_name
+            SELECT b.*, u.name as customer_name, u.email as customer_email, u.phone as customer_phone, r.room_number, rt.name as room_type_name
             FROM bookings b
             JOIN users u ON b.customer_id = u.id
             JOIN rooms r ON b.room_id = r.id

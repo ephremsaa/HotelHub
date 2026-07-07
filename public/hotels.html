@@ -59,7 +59,7 @@
                 HotelHub
             </a>
             
-            <ul class="nav-menu d-none" id="main-nav-menu">
+            <ul class="nav-menu" id="main-nav-menu">
                 <li><a href="/">Home</a></li>
                 <li><a href="/hotels.html" class="active">Destinations</a></li>
                 <li><a href="#">Offers</a></li>
@@ -81,29 +81,29 @@
                 
                 <div class="filter-section">
                     <h3 class="filter-title">Price Range</h3>
-                    <input type="range" min="0" max="1000" value="1000" style="width: 100%; margin-bottom: 0.5rem;">
+                    <input type="range" id="filter-price" min="0" max="20000" value="20000" step="500" style="width: 100%; margin-bottom: 0.5rem;" oninput="document.getElementById('price-display').innerText = this.value + ' BIRR'">
                     <div class="d-flex justify-between" style="font-size: 0.85rem; color: var(--text-muted);">
                         <span>0 BIRR</span>
-                        <span>1000+ BIRR</span>
+                        <span id="price-display">20000 BIRR</span>
                     </div>
                 </div>
 
                 <div class="filter-section">
                     <h3 class="filter-title">Star Rating</h3>
-                    <label class="filter-checkbox"><input type="checkbox"> 5 Stars (Luxury)</label>
-                    <label class="filter-checkbox"><input type="checkbox"> 4 Stars (Premium)</label>
-                    <label class="filter-checkbox"><input type="checkbox"> 3 Stars (Comfort)</label>
+                    <label class="filter-checkbox"><input type="checkbox" name="stars" value="5"> 5 Stars (Luxury)</label>
+                    <label class="filter-checkbox"><input type="checkbox" name="stars" value="4"> 4 Stars (Premium)</label>
+                    <label class="filter-checkbox"><input type="checkbox" name="stars" value="3"> 3 Stars (Comfort)</label>
                 </div>
                 
                 <div class="filter-section">
                     <h3 class="filter-title">Amenities</h3>
-                    <label class="filter-checkbox"><input type="checkbox"> Swimming Pool</label>
-                    <label class="filter-checkbox"><input type="checkbox"> Spa & Wellness</label>
-                    <label class="filter-checkbox"><input type="checkbox"> Free WiFi</label>
-                    <label class="filter-checkbox"><input type="checkbox"> Fitness Center</label>
+                    <label class="filter-checkbox"><input type="checkbox" name="amenities" value="Swimming Pool"> Swimming Pool</label>
+                    <label class="filter-checkbox"><input type="checkbox" name="amenities" value="Spa & Wellness"> Spa & Wellness</label>
+                    <label class="filter-checkbox"><input type="checkbox" name="amenities" value="Free WiFi"> Free WiFi</label>
+                    <label class="filter-checkbox"><input type="checkbox" name="amenities" value="Fitness Center"> Fitness Center</label>
                 </div>
                 
-                <button class="btn btn-primary" style="width: 100%;">Apply Filters</button>
+                <button class="btn btn-primary" style="width: 100%;" onclick="applyFilters()">Apply Filters</button>
             </aside>
             
             <!-- Results Grid -->
@@ -114,11 +114,11 @@
                         <p style="color: var(--text-muted); font-size: 0.95rem;" id="results-count">Loading results...</p>
                     </div>
                     <div>
-                        <select class="form-control" style="padding: 0.5rem 1rem; border-radius: var(--radius-full); width: auto;">
-                            <option>Recommended</option>
-                            <option>Price: Low to High</option>
-                            <option>Price: High to Low</option>
-                            <option>Highest Rated</option>
+                        <select id="sort-select" class="form-control" style="padding: 0.5rem 1rem; border-radius: var(--radius-full); width: auto;" onchange="applyFilters()">
+                            <option value="recommended">Recommended</option>
+                            <option value="price-asc">Price: Low to High</option>
+                            <option value="price-desc">Price: High to Low</option>
+                            <option value="rating-desc">Highest Rated</option>
                         </select>
                     </div>
                 </div>
@@ -154,14 +154,8 @@
             fetchHotels();
             
             const liveSearch = document.getElementById('live-search');
-            liveSearch.addEventListener('input', (e) => {
-                const query = e.target.value.toLowerCase();
-                const filtered = allHotels.filter(h => 
-                    h.city.toLowerCase().includes(query) || 
-                    h.hotel_name.toLowerCase().includes(query) ||
-                    h.country.toLowerCase().includes(query)
-                );
-                renderHotels(filtered);
+            liveSearch.addEventListener('input', () => {
+                applyFilters();
             });
         });
 
@@ -178,18 +172,61 @@
                 const hotels = await apiCall('/hotels');
                 allHotels = hotels;
                 
-                if (cityQuery) {
-                    const filtered = hotels.filter(h => h.city.toLowerCase().includes(cityQuery.toLowerCase()));
-                    renderHotels(filtered);
-                } else {
-                    renderHotels(hotels);
-                }
+                applyFilters(); // Automatically applies cityQuery if it's in the search box
             } catch (error) {
                 console.error(error);
                 document.getElementById('hotels-grid').innerHTML = '<p class="error">Failed to load hotels.</p>';
             }
         }
         
+        function applyFilters() {
+            const query = document.getElementById('live-search').value.toLowerCase();
+            const maxPrice = parseFloat(document.getElementById('filter-price').value);
+            
+            // Get selected star ratings
+            const selectedStars = Array.from(document.querySelectorAll('input[name="stars"]:checked')).map(cb => parseInt(cb.value));
+            
+            // Get selected amenities
+            const selectedAmenities = Array.from(document.querySelectorAll('input[name="amenities"]:checked')).map(cb => cb.value);
+            
+            // Filter logic
+            let filtered = allHotels.filter(h => {
+                const matchesQuery = h.city.toLowerCase().includes(query) || 
+                                     h.hotel_name.toLowerCase().includes(query) ||
+                                     h.country.toLowerCase().includes(query);
+                
+                const matchesPrice = parseFloat(h.base_price) <= maxPrice;
+                
+                const matchesStars = selectedStars.length === 0 || selectedStars.includes(parseInt(h.star_rating));
+                
+                // For amenities, hotel must have ALL selected amenities
+                let matchesAmenities = true;
+                if (selectedAmenities.length > 0) {
+                    if (!h.amenities) matchesAmenities = false;
+                    else {
+                        // Handle if amenities is a string or array
+                        const hotelAmenitiesArray = Array.isArray(h.amenities) ? h.amenities : 
+                            (typeof h.amenities === 'string' ? JSON.parse(h.amenities || '[]') : []);
+                        matchesAmenities = selectedAmenities.every(a => hotelAmenitiesArray.includes(a));
+                    }
+                }
+                
+                return matchesQuery && matchesPrice && matchesStars && matchesAmenities;
+            });
+            
+            // Sort logic
+            const sortVal = document.getElementById('sort-select').value;
+            if (sortVal === 'price-asc') {
+                filtered.sort((a, b) => parseFloat(a.base_price) - parseFloat(b.base_price));
+            } else if (sortVal === 'price-desc') {
+                filtered.sort((a, b) => parseFloat(b.base_price) - parseFloat(a.base_price));
+            } else if (sortVal === 'rating-desc') {
+                filtered.sort((a, b) => parseInt(b.star_rating) - parseInt(a.star_rating));
+            }
+            
+            renderHotels(filtered);
+        }
+
         function renderHotels(hotels) {
             document.getElementById('results-count').innerText = `${hotels.length} properties found`;
             const grid = document.getElementById('hotels-grid');
@@ -222,7 +259,7 @@
                         </div>
                         <div class="hotel-card-footer">
                             <div>
-                                <div class="hotel-card-price" style="font-size: 1.25rem;">Explore <span>prices</span></div>
+                                <div class="hotel-card-price" style="font-size: 1.25rem;">${hotel.base_price} BIRR <span>/ night</span></div>
                             </div>
                             <button class="btn btn-outline" style="padding: 0.5rem 1rem; font-size: 0.85rem;">Select</button>
                         </div>

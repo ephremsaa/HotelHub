@@ -79,8 +79,8 @@
             const role = document.getElementById('role').value;
             const btn = e.target.querySelector('button[type="submit"]');
             
-            btn.innerHTML = '<span class="loading" style="display:inline-block; width:16px; height:16px; border:2px solid white; border-top-color:transparent; border-radius:50%; animation:spin 1s linear infinite;"></span> Processing...';
-            btn.disabled = true;
+            setButtonLoading(btn, true, "Processing...");
+            
             
             try {
                 await apiCall('/auth/register', 'POST', { name, email, phone, password, role });
@@ -88,8 +88,8 @@
                 setTimeout(() => window.location.href = '/login.html', 1500);
             } catch (err) {
                 showToast(err.message, 'error');
-                btn.innerHTML = 'Create Account';
-                btn.disabled = false;
+                setButtonLoading(btn, false, "Create Account");
+                
             }
         });
 

@@ -29,7 +29,9 @@ CREATE TABLE hotels (
     phone VARCHAR(50) NOT NULL,
     email VARCHAR(255) NOT NULL,
     star_rating INTEGER DEFAULT 0 CHECK(star_rating BETWEEN 0 AND 5),
+    base_price DECIMAL(10, 2) NOT NULL DEFAULT 0.00,
     cover_image TEXT,
+    pool_image_url TEXT,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
@@ -42,6 +44,7 @@ CREATE TABLE room_types (
     price_per_night DECIMAL(10, 2) NOT NULL,
     beds INTEGER NOT NULL DEFAULT 1,
     bathrooms INTEGER NOT NULL DEFAULT 1,
+    image_url TEXT,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 

@@ -16,7 +16,7 @@ const storage = multer.diskStorage({
 });
 const upload = multer({ 
     storage: storage,
-    limits: { fileSize: 5 * 1024 * 1024 } // 5MB limit
+    limits: { fileSize: 50 * 1024 * 1024 } // 50MB limit
 });
 const validateHotel = [
     body('hotel_name').notEmpty().withMessage('Hotel name is required'),
@@ -32,10 +32,17 @@ const validateHotel = [
     }
 ];
 
+const cpUpload = upload.fields([
+    { name: 'cover_image', maxCount: 1 },
+    { name: 'pool_image', maxCount: 1 },
+    { name: 'gallery_images', maxCount: 10 }
+]);
+
 router.get('/', hotelController.getHotels);
 router.get('/:id', hotelController.getHotelById);
-router.post('/', authorize(['hotel_owner']), upload.single('cover_image'), validateHotel, hotelController.createHotel);
-router.put('/:id', authorize(['hotel_owner', 'admin']), upload.single('cover_image'), validateHotel, hotelController.updateHotel);
+router.post('/', authorize(['hotel_owner']), cpUpload, validateHotel, hotelController.createHotel);
+router.put('/:id', authorize(['hotel_owner', 'admin']), cpUpload, validateHotel, hotelController.updateHotel);
 router.delete('/:id', authorize(['hotel_owner', 'admin']), hotelController.deleteHotel);
+router.delete('/gallery/:imageId', authorize(['hotel_owner', 'admin']), hotelController.deleteGalleryImage);
 
 module.exports = router;

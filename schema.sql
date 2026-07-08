@@ -61,7 +61,9 @@ CREATE TABLE rooms (
 
 CREATE TABLE bookings (
     id SERIAL PRIMARY KEY,
-    customer_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    customer_id INTEGER REFERENCES users(id) ON DELETE CASCADE,
+    guest_name VARCHAR(255),
+    guest_phone VARCHAR(50),
     hotel_id INTEGER NOT NULL REFERENCES hotels(id) ON DELETE CASCADE,
     room_id INTEGER NOT NULL REFERENCES rooms(id) ON DELETE CASCADE,
     check_in DATE NOT NULL,

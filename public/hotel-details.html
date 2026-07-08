@@ -46,6 +46,17 @@
                 <input type="hidden" id="book-hotel-id">
                 <input type="hidden" id="book-price-per-night">
                 
+                <div id="owner-guest-details" style="display: none;">
+                    <div class="form-group">
+                        <label class="form-label">Guest Name</label>
+                        <input type="text" class="form-control" id="book-guest-name">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Guest Phone</label>
+                        <input type="text" class="form-control" id="book-guest-phone">
+                    </div>
+                </div>
+
                 <div class="form-group">
                     <label class="form-label">Check-in Date</label>
                     <input type="date" class="form-control" id="book-check-in" required onchange="calculatePrice()">
@@ -280,9 +291,19 @@
                 setTimeout(() => window.location.href = '/login.html', 1500);
                 return;
             }
-            if (user.role !== 'customer') {
-                showToast('Only customers can book rooms', 'error');
+            if (user.role !== 'customer' && user.role !== 'hotel_owner') {
+                showToast('Only customers or owners can book rooms', 'error');
                 return;
+            }
+
+            if (user.role === 'hotel_owner') {
+                document.getElementById('owner-guest-details').style.display = 'block';
+                document.getElementById('book-guest-name').required = true;
+                document.getElementById('book-guest-phone').required = true;
+            } else {
+                document.getElementById('owner-guest-details').style.display = 'none';
+                document.getElementById('book-guest-name').required = false;
+                document.getElementById('book-guest-phone').required = false;
             }
 
             document.getElementById('book-room-id').value = roomId;
@@ -339,17 +360,29 @@
             btn.disabled = true;
 
             try {
-                await apiCall('/bookings', 'POST', {
+                const reqData = {
                     hotel_id: hId,
                     room_id: roomId,
                     check_in: checkIn,
                     check_out: checkOut,
                     total_price: totalPrice
-                });
+                };
+                
+                const user = JSON.parse(localStorage.getItem('user'));
+                if (user && user.role === 'hotel_owner') {
+                    reqData.guest_name = document.getElementById('book-guest-name').value;
+                    reqData.guest_phone = document.getElementById('book-guest-phone').value;
+                }
+
+                await apiCall('/bookings', 'POST', reqData);
                 
                 showToast('Reservation confirmed!');
                 setTimeout(() => {
-                    window.location.href = '/customer-dashboard.html';
+                    if (user && user.role === 'hotel_owner') {
+                        window.location.href = '/owner-dashboard.html';
+                    } else {
+                        window.location.href = '/customer-dashboard.html';
+                    }
                 }, 1500);
             } catch (err) {
                 showToast(err.message, 'error');

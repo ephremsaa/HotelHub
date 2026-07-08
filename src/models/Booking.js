@@ -1,11 +1,11 @@
 const db = require('../config/db');
 
 const Booking = {
-    create: async (customer_id, hotel_id, room_id, check_in, check_out, total_price) => {
+    create: async (customer_id, hotel_id, room_id, check_in, check_out, total_price, guest_name = null, guest_phone = null) => {
         const query = `
-            INSERT INTO bookings (customer_id, hotel_id, room_id, check_in, check_out, total_price, booking_status)
-            VALUES ($1, $2, $3, $4, $5, $6, 'Pending') RETURNING *`;
-        const values = [customer_id, hotel_id, room_id, check_in, check_out, total_price];
+            INSERT INTO bookings (customer_id, hotel_id, room_id, check_in, check_out, total_price, guest_name, guest_phone, booking_status)
+            VALUES ($1, $2, $3, $4, $5, $6, $7, $8, 'Pending') RETURNING *`;
+        const values = [customer_id, hotel_id, room_id, check_in, check_out, total_price, guest_name, guest_phone];
         const result = await db.query(query, values);
         return result.rows[0];
     },
@@ -30,9 +30,9 @@ const Booking = {
 
     findByHotelId: async (hotel_id) => {
         const result = await db.query(`
-            SELECT b.*, u.name as customer_name, u.email as customer_email, u.phone as customer_phone, r.room_number, rt.name as room_type_name
+            SELECT b.*, COALESCE(u.name, b.guest_name) as customer_name, COALESCE(u.email, 'N/A') as customer_email, COALESCE(u.phone, b.guest_phone) as customer_phone, r.room_number, rt.name as room_type_name
             FROM bookings b
-            JOIN users u ON b.customer_id = u.id
+            LEFT JOIN users u ON b.customer_id = u.id
             JOIN rooms r ON b.room_id = r.id
             JOIN room_types rt ON r.room_type_id = rt.id
             WHERE b.hotel_id = $1

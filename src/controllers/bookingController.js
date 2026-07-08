@@ -3,8 +3,24 @@ const Hotel = require('../models/Hotel');
 
 exports.createBooking = async (req, res) => {
     try {
-        const { hotel_id, room_id, check_in, check_out, total_price } = req.body;
-        const newBooking = await Booking.create(req.user.id, hotel_id, room_id, check_in, check_out, total_price);
+        const { hotel_id, room_id, check_in, check_out, total_price, guest_name, guest_phone } = req.body;
+        
+        let customerId = req.user.id;
+        let finalGuestName = null;
+        let finalGuestPhone = null;
+        
+        if (req.user.role === 'hotel_owner' && guest_name) {
+            const hotel = await Hotel.findById(hotel_id);
+            if (hotel && hotel.owner_id === req.user.id) {
+                customerId = null;
+                finalGuestName = guest_name;
+                finalGuestPhone = guest_phone;
+            } else {
+                return res.status(403).json({ error: 'Not authorized to make offline bookings for this hotel' });
+            }
+        }
+        
+        const newBooking = await Booking.create(customerId, hotel_id, room_id, check_in, check_out, total_price, finalGuestName, finalGuestPhone);
         res.status(201).json({ message: 'Booking created successfully', booking: newBooking });
     } catch (err) {
         console.error(err);

@@ -248,6 +248,47 @@
             
             <section id="reservations" class="d-none">
                 <h1 class="mb-8" style="font-size: 2rem;">Reservations</h1>
+                
+                <div style="margin-bottom: 3rem;">
+                    <h3 class="mb-4">Create Walk-in Reservation</h3>
+                    <div class="table-wrapper" style="padding: 2rem; background: var(--card-bg);">
+                        <form id="walkin-form">
+                            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem;">
+                                <div class="form-group">
+                                    <label class="form-label">Guest Name</label>
+                                    <input type="text" id="wi_guest_name" class="form-control" required>
+                                </div>
+                                <div class="form-group">
+                                    <label class="form-label">Guest Phone</label>
+                                    <input type="text" id="wi_guest_phone" class="form-control" required>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">Select Room</label>
+                                <select id="wi_room_id" class="form-control" required>
+                                    <option value="" disabled selected>Loading rooms...</option>
+                                </select>
+                            </div>
+                            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem;">
+                                <div class="form-group">
+                                    <label class="form-label">Check In</label>
+                                    <input type="date" id="wi_check_in" class="form-control" required>
+                                </div>
+                                <div class="form-group">
+                                    <label class="form-label">Check Out</label>
+                                    <input type="date" id="wi_check_out" class="form-control" required>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">Total Price (BIRR)</label>
+                                <input type="number" id="wi_total_price" class="form-control" step="0.01" required>
+                            </div>
+                            <button type="submit" class="btn btn-primary" style="width: 100%;">Create Reservation</button>
+                        </form>
+                    </div>
+                </div>
+
+                <h3 class="mb-4">Current Reservations</h3>
                 <div class="table-wrapper table-responsive">
                     <table>
                         <thead>
@@ -660,11 +701,48 @@
 
                 tbody.innerHTML = res.map(b => buildRow(b, true)).join('');
                 recentTbody.innerHTML = res.slice(0, 5).map(b => buildRow(b, false)).join('');
+                
+                // Fetch physical rooms to populate the walk-in form
+                const rooms = await apiCall(`/rooms/hotel/${myHotelId}`);
+                const wiSelect = document.getElementById('wi_room_id');
+                wiSelect.innerHTML = '<option value="" disabled selected>Select a Room</option>' + 
+                    rooms.filter(r => r.status === 'available').map(r => `<option value="${r.id}">Room ${r.room_number} (${r.room_type_name})</option>`).join('');
 
             } catch (err) {
                 console.error(err);
             }
         }
+        
+        document.getElementById('walkin-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            if (!myHotelId) return showToast('Create property profile first', 'error');
+            
+            const btn = e.target.querySelector('button[type="submit"]');
+            btn.disabled = true;
+            btn.innerHTML = '<div class="spinner"></div> Creating...';
+            
+            const data = {
+                hotel_id: myHotelId,
+                room_id: document.getElementById('wi_room_id').value,
+                check_in: document.getElementById('wi_check_in').value,
+                check_out: document.getElementById('wi_check_out').value,
+                total_price: document.getElementById('wi_total_price').value,
+                guest_name: document.getElementById('wi_guest_name').value,
+                guest_phone: document.getElementById('wi_guest_phone').value
+            };
+            
+            try {
+                await apiCall('/bookings', 'POST', data);
+                showToast('Walk-in reservation created successfully!');
+                e.target.reset();
+                loadReservations();
+            } catch (err) {
+                showToast(err.message, 'error');
+            } finally {
+                btn.disabled = false;
+                btn.innerHTML = 'Create Reservation';
+            }
+        });
         
         async function updateStatus(id, status) {
             try {
